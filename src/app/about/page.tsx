@@ -4,7 +4,7 @@ import { getPageContent } from "@/lib/content";
 import { SITE_BYLINE, SITE_NAME } from "@/lib/site";
 
 export const metadata = {
-  title: "เกี่ยวกับผู้สมัคร",
+  title: "เกี่ยวกับเจ้าของเว็บไซต์",
 };
 
 export default async function AboutPage() {
@@ -13,7 +13,7 @@ export default async function AboutPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-section sm:px-6">
       <h1 className="text-heading-lg font-bold text-[var(--color-text-primary)]">
-        เกี่ยวกับผู้สมัคร
+        เกี่ยวกับเจ้าของเว็บไซต์
       </h1>
       <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start">
         <EditableImage

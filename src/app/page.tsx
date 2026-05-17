@@ -47,7 +47,7 @@ export default async function HomePage() {
           />
           <div className="mt-10 flex flex-wrap gap-4">
             <Link href="/about" className="btn-primary">
-              ทำความรู้จักผู้สมัคร
+              ทำความรู้จักเจ้าของเว็บไซต์
             </Link>
             <Link href="/voice" className="btn-secondary border-cream text-cream hover:bg-cream hover:text-navy">
               ส่งเสียงของคุณ

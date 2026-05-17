@@ -3,26 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Article, ArticleCategory } from "@/types/database";
+import { articleBasePath } from "@/lib/article-categories";
+import { isArticlePublic } from "@/lib/articles-publish";
 import { ArticleImageField } from "@/components/knowledge/ArticleImageField";
 import { ArticlePublishField } from "@/components/knowledge/ArticlePublishField";
+import { ArticleCopySocialButton } from "@/components/knowledge/ArticleCopySocialButton";
 import { inferPublishMode, type PublishMode } from "@/lib/articles-publish";
 import { Button } from "@/components/ui/Button";
 
-const CATEGORIES: { value: ArticleCategory; label: string }[] = [
+const KNOWLEDGE_CATEGORY_OPTIONS: { value: ArticleCategory; label: string }[] = [
   { value: "legal", label: "กฎหมาย" },
   { value: "health", label: "สุขภาพ" },
 ];
 
+export type ArticleFormVariant = "knowledge" | "author";
+
 interface ArticleFormProps {
   mode: "create" | "edit";
   article?: Article;
+  variant?: ArticleFormVariant;
 }
 
-export function ArticleForm({ mode, article }: ArticleFormProps) {
+export function ArticleForm({
+  mode,
+  article,
+  variant = "knowledge",
+}: ArticleFormProps) {
   const router = useRouter();
+  const isAuthor = variant === "author";
+  const managePath = isAuthor ? "/author" : "/knowledge/manage";
+
   const [title, setTitle] = useState(article?.title ?? "");
   const [category, setCategory] = useState<ArticleCategory>(
-    article?.category ?? "legal"
+    article?.category ?? (isAuthor ? "author" : "legal")
   );
   const [summary, setSummary] = useState(article?.summary ?? "");
   const [body, setBody] = useState(article?.body ?? "");
@@ -33,6 +46,20 @@ export function ArticleForm({ mode, article }: ArticleFormProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const effectiveCategory = isAuthor ? "author" : category;
+  const canCopySocial =
+    mode === "edit" &&
+    article &&
+    isArticlePublic({
+      ...article,
+      published_at:
+        publishMode === "now"
+          ? new Date().toISOString()
+          : publishMode === "draft"
+            ? null
+            : article.published_at,
+    });
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -40,7 +67,7 @@ export function ArticleForm({ mode, article }: ArticleFormProps) {
 
     const payload = {
       title,
-      category,
+      category: effectiveCategory,
       summary,
       body,
       image_url: imageUrl.trim() || null,
@@ -61,8 +88,10 @@ export function ArticleForm({ mode, article }: ArticleFormProps) {
       if (!res.ok) {
         throw new Error(data.error || "Save failed");
       }
+
+      const base = articleBasePath(data.category as ArticleCategory);
       router.push(
-        publishMode === "draft" ? "/knowledge/manage" : `/knowledge/${data.id}`
+        publishMode === "draft" ? managePath : `${base}/${data.id}`
       );
       router.refresh();
     } catch (err) {
@@ -90,23 +119,25 @@ export function ArticleForm({ mode, article }: ArticleFormProps) {
           className={inputClass}
         />
       </div>
-      <div>
-        <label htmlFor="category" className="block text-body-lg font-semibold">
-          หมวดหมู่
-        </label>
-        <select
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as ArticleCategory)}
-          className={inputClass}
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c.value} value={c.value}>
-              {c.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!isAuthor && (
+        <div>
+          <label htmlFor="category" className="block text-body-lg font-semibold">
+            หมวดหมู่
+          </label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as ArticleCategory)}
+            className={inputClass}
+          >
+            {KNOWLEDGE_CATEGORY_OPTIONS.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <ArticleImageField
         imageUrl={imageUrl}
         onImageUrlChange={setImageUrl}
@@ -119,6 +150,20 @@ export function ArticleForm({ mode, article }: ArticleFormProps) {
         onScheduleDateChange={setScheduleDate}
         existingPublishedAt={article?.published_at}
       />
+      {canCopySocial && article && (
+        <div className="rounded-lg border-2 border-dashed border-[var(--color-border)] p-4">
+          <p className="text-body-lg font-semibold">แชร์โซเชียลมีเดีย</p>
+          <div className="mt-3">
+            <ArticleCopySocialButton
+              articleId={article.id}
+              title={title}
+              summary={summary}
+              imageUrl={imageUrl.trim() || null}
+              category={effectiveCategory}
+            />
+          </div>
+        </div>
+      )}
       <div>
         <label htmlFor="summary" className="block text-body-lg font-semibold">
           สรุปย่อ

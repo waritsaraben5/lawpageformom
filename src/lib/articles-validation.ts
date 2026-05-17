@@ -60,7 +60,9 @@ export function parseArticleInput(body: unknown): ArticleInput | null {
   if (typeof title !== "string" || !title.trim()) return null;
   if (typeof summary !== "string" || !summary.trim()) return null;
   if (typeof articleBody !== "string" || !articleBody.trim()) return null;
-  if (category !== "legal" && category !== "health") return null;
+  if (category !== "legal" && category !== "health" && category !== "author") {
+    return null;
+  }
 
   if (
     image_url !== undefined &&

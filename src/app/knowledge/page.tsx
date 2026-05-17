@@ -1,4 +1,4 @@
-import { getArticles } from "@/lib/articles";
+import { getKnowledgeArticles } from "@/lib/articles";
 import { ArticleCard } from "@/components/knowledge/ArticleCard";
 import { KnowledgeAdminBar } from "@/components/knowledge/KnowledgeAdminBar";
 
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function KnowledgePage() {
-  const articles = await getArticles();
+  const articles = await getKnowledgeArticles();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-section sm:px-6">

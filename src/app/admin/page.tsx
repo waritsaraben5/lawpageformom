@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
         </li>
         <li>
           <Link href="/about" className="text-[var(--color-accent)] hover:underline focus-visible:focus-ring rounded">
-            เกี่ยวกับผู้สมัคร
+            เกี่ยวกับเจ้าของเว็บไซต์
           </Link>
         </li>
         <li>
@@ -47,6 +47,14 @@ export default function AdminDashboardPage() {
             className="text-[var(--color-accent)] hover:underline focus-visible:focus-ring rounded"
           >
             ศูนย์ความรู้ (เพิ่ม/แก้ไขบทความ)
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/author"
+            className="text-[var(--color-accent)] hover:underline focus-visible:focus-ring rounded"
+          >
+            บทความโดยผู้เขียน
           </Link>
         </li>
         <li>

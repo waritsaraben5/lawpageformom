@@ -11,8 +11,9 @@ import { SITE_BYLINE, SITE_NAME } from "@/lib/site";
 
 const NAV_ITEMS = [
   { href: "/", label: "หน้าแรก" },
-  { href: "/about", label: "เกี่ยวกับผู้สมัคร" },
+  { href: "/about", label: "เกี่ยวกับเจ้าของเว็บไซต์" },
   { href: "/knowledge", label: "ศูนย์ความรู้" },
+  { href: "/author", label: "บทความโดยผู้เขียน" },
   { href: "/voice", label: "เสียงจากสมาชิก" },
 ];
 

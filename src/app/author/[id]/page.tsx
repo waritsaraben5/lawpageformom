@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { isAuthorCategory } from "@/lib/article-categories";
 import { ArticleAdminToolbar } from "@/components/knowledge/ArticleAdminToolbar";
 import { ArticleCoverImage } from "@/components/knowledge/ArticleCoverImage";
 import { ArticlePreviewBanner } from "@/components/knowledge/ArticlePreviewBanner";
 import { getArticleById } from "@/lib/articles";
+import { isAuthorCategory } from "@/lib/article-categories";
 import { getArticlePublishStatus } from "@/lib/articles-publish";
 import { formatThaiDate } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ export async function generateMetadata({
   return { title: article?.title ?? "บทความ" };
 }
 
-export default async function ArticlePage({
+export default async function AuthorArticlePage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -30,17 +30,17 @@ export default async function ArticlePage({
     notFound();
   }
 
-  if (isAuthorCategory(article.category)) {
-    redirect(`/author/${id}`);
+  if (!isAuthorCategory(article.category)) {
+    redirect(`/knowledge/${id}`);
   }
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-section sm:px-6">
       <Link
-        href="/knowledge"
+        href="/author"
         className="text-body-lg font-semibold text-[var(--color-accent)] hover:underline focus-visible:focus-ring rounded"
       >
-        ← กลับศูนย์ความรู้
+        ← กลับบทความโดยผู้เขียน
       </Link>
       <ArticlePreviewBanner article={article} />
       {article.image_url && (
@@ -65,10 +65,12 @@ export default async function ArticlePage({
       <p className="mt-6 text-body-lg font-medium text-[var(--color-text-muted)]">
         {article.summary}
       </p>
-      <div className="prose-accessible mt-8 whitespace-pre-wrap">
-        {article.body}
-      </div>
-      <ArticleAdminToolbar article={article} listPath="/knowledge" />
+      <div className="prose-accessible mt-8 whitespace-pre-wrap">{article.body}</div>
+      <ArticleAdminToolbar
+        article={article}
+        listPath="/author"
+        editPath={`/author/${article.id}/edit`}
+      />
     </article>
   );
 }

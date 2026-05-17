@@ -1,4 +1,4 @@
-export type ArticleCategory = "legal" | "health";
+export type ArticleCategory = "legal" | "health" | "author";
 
 export type Json =
   | string
@@ -44,6 +44,11 @@ export type Database = {
           body: string;
           image_url: string | null;
           published_at: string | null;
+          share_on_facebook: boolean;
+          share_on_instagram: boolean;
+          facebook_post_id: string | null;
+          instagram_post_id: string | null;
+          social_posted_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -54,6 +59,11 @@ export type Database = {
           body: string;
           image_url?: string | null;
           published_at?: string | null;
+          share_on_facebook?: boolean;
+          share_on_instagram?: boolean;
+          facebook_post_id?: string | null;
+          instagram_post_id?: string | null;
+          social_posted_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -64,6 +74,11 @@ export type Database = {
           body?: string;
           image_url?: string | null;
           published_at?: string | null;
+          share_on_facebook?: boolean;
+          share_on_instagram?: boolean;
+          facebook_post_id?: string | null;
+          instagram_post_id?: string | null;
+          social_posted_at?: string | null;
           created_at?: string;
         };
         Relationships: [];

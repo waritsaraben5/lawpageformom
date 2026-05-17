@@ -1,7 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isArticlePublic } from "@/lib/articles-publish";
+import { KNOWLEDGE_CATEGORIES } from "@/lib/article-categories";
 import type { Article, ArticleCategory } from "@/types/database";
+
+export type ArticleListFilter = {
+  category?: ArticleCategory;
+  categories?: ArticleCategory[];
+};
 
 const SAMPLE_ARTICLES: Article[] = [
   {
@@ -12,6 +18,11 @@ const SAMPLE_ARTICLES: Article[] = [
     body: "สมาชิกมีสิทธิในการเข้าร่วมประชุม ลงคะแนนเลือกตั้งคณะกรรมการ และรับทราบข้อมูลการเงินที่โปร่งใส หากมีข้อสงสัย สามารถสอบถามคณะกรรมการได้ตามระเบียบของสหกรณ์",
     image_url: null,
     published_at: new Date().toISOString(),
+    share_on_facebook: false,
+    share_on_instagram: false,
+    facebook_post_id: null,
+    instagram_post_id: null,
+    social_posted_at: null,
     created_at: new Date().toISOString(),
   },
   {
@@ -22,9 +33,32 @@ const SAMPLE_ARTICLES: Article[] = [
     body: "การวางแผนสุขภาพและการเงินหลังเกษียณช่วยลดความกังวล ควรตรวจสุขภาพประจำปี ออกกำลังกายเบาๆ และทบทวนแผนออมทรัพย์กับที่ปรึกษาสหกรณ์",
     image_url: null,
     published_at: new Date().toISOString(),
+    share_on_facebook: false,
+    share_on_instagram: false,
+    facebook_post_id: null,
+    instagram_post_id: null,
+    social_posted_at: null,
     created_at: new Date().toISOString(),
   },
 ];
+
+function matchesFilter(article: Article, filter?: ArticleListFilter): boolean {
+  if (!filter) return true;
+  if (filter.category) return article.category === filter.category;
+  if (filter.categories?.length) {
+    return filter.categories.includes(article.category);
+  }
+  return true;
+}
+
+function applySupabaseCategoryFilter<T extends { eq: (c: string, v: string) => T; in: (c: string, v: string[]) => T }>(
+  query: T,
+  filter?: ArticleListFilter
+): T {
+  if (filter?.category) return query.eq("category", filter.category);
+  if (filter?.categories?.length) return query.in("category", filter.categories);
+  return query;
+}
 
 async function isAdminViewer(): Promise<boolean> {
   if (!isSupabaseConfigured()) return false;
@@ -49,15 +83,15 @@ function sortArticles(articles: Article[]): Article[] {
 }
 
 export async function getPublishedArticles(
-  category?: ArticleCategory
+  filter?: ArticleListFilter
 ): Promise<Article[]> {
   const now = new Date().toISOString();
 
   if (!isSupabaseConfigured()) {
-    const published = SAMPLE_ARTICLES.filter(isArticlePublic);
-    return category
-      ? published.filter((a) => a.category === category)
-      : published;
+    const published = SAMPLE_ARTICLES.filter(
+      (a) => isArticlePublic(a) && matchesFilter(a, filter)
+    );
+    return published;
   }
 
   try {
@@ -69,60 +103,64 @@ export async function getPublishedArticles(
       .lte("published_at", now)
       .order("published_at", { ascending: false });
 
-    if (category) {
-      query = query.eq("category", category);
-    }
+    query = applySupabaseCategoryFilter(query, filter);
 
     const { data, error } = await query;
     if (error || !data?.length) {
-      const published = SAMPLE_ARTICLES.filter(isArticlePublic);
-      return category
-        ? published.filter((a) => a.category === category)
-        : published;
+      return SAMPLE_ARTICLES.filter(
+        (a) => isArticlePublic(a) && matchesFilter(a, filter)
+      );
     }
     return data as Article[];
   } catch {
-    return SAMPLE_ARTICLES.filter(isArticlePublic);
+    return SAMPLE_ARTICLES.filter(
+      (a) => isArticlePublic(a) && matchesFilter(a, filter)
+    );
   }
 }
 
 export async function getAllArticles(
-  category?: ArticleCategory
+  filter?: ArticleListFilter
 ): Promise<Article[]> {
   if (!isSupabaseConfigured()) {
-    const list = category
-      ? SAMPLE_ARTICLES.filter((a) => a.category === category)
-      : SAMPLE_ARTICLES;
+    const list = SAMPLE_ARTICLES.filter((a) => matchesFilter(a, filter));
     return sortArticles(list);
   }
 
   try {
     const supabase = await createClient();
     let query = supabase.from("articles").select("*");
-
-    if (category) {
-      query = query.eq("category", category);
-    }
+    query = applySupabaseCategoryFilter(query, filter);
 
     const { data, error } = await query;
     if (error || !data?.length) {
-      return sortArticles(SAMPLE_ARTICLES);
+      return sortArticles(
+        SAMPLE_ARTICLES.filter((a) => matchesFilter(a, filter))
+      );
     }
     return sortArticles(data as Article[]);
   } catch {
-    return sortArticles(SAMPLE_ARTICLES);
+    return sortArticles(SAMPLE_ARTICLES.filter((a) => matchesFilter(a, filter)));
   }
 }
 
 /** Public list, or all articles when an admin is signed in */
 export async function getArticles(
-  category?: ArticleCategory
+  filter?: ArticleListFilter
 ): Promise<Article[]> {
   const admin = await isAdminViewer();
   if (admin) {
-    return getAllArticles(category);
+    return getAllArticles(filter);
   }
-  return getPublishedArticles(category);
+  return getPublishedArticles(filter);
+}
+
+export async function getKnowledgeArticles(): Promise<Article[]> {
+  return getArticles({ categories: [...KNOWLEDGE_CATEGORIES] });
+}
+
+export async function getAuthorArticles(): Promise<Article[]> {
+  return getArticles({ category: "author" });
 }
 
 export async function getArticleById(

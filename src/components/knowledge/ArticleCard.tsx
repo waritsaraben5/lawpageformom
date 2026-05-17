@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Pencil, Stethoscope, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useAdmin } from "@/contexts/AdminContext";
+import { CATEGORY_META, articleBasePath } from "@/lib/article-categories";
 import { formatThaiDate } from "@/lib/utils";
 import {
   getArticlePublishStatus,
@@ -15,17 +16,13 @@ import { ArticleCoverImage } from "@/components/knowledge/ArticleCoverImage";
 import { PublishStatusBadge } from "@/components/knowledge/PublishStatusBadge";
 import { Button } from "@/components/ui/Button";
 
-const CATEGORY_LABELS = {
-  legal: { label: "กฎหมาย", icon: BookOpen },
-  health: { label: "สุขภาพ", icon: Stethoscope },
-} as const;
-
 export function ArticleCard({ article }: { article: Article }) {
   const { isAdmin, loading } = useAdmin();
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
 
-  const cat = CATEGORY_LABELS[article.category];
+  const base = articleBasePath(article.category);
+  const cat = CATEGORY_META[article.category];
   const Icon = cat.icon;
   const status = getArticlePublishStatus(article);
   const showAdminBadge = !loading && isAdmin && status !== "published";
@@ -69,7 +66,7 @@ export function ArticleCard({ article }: { article: Article }) {
       </div>
       <h2 className="mt-3 text-heading-sm font-bold">
         <Link
-          href={`/knowledge/${article.id}`}
+          href={`${base}/${article.id}`}
           className="hover:underline focus-visible:focus-ring rounded"
         >
           {article.title}
@@ -85,14 +82,14 @@ export function ArticleCard({ article }: { article: Article }) {
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {(isArticlePublic(article) || isAdmin) && (
-          <Link href={`/knowledge/${article.id}`} className="btn-secondary">
+          <Link href={`${base}/${article.id}`} className="btn-secondary">
             {isArticlePublic(article) ? "อ่านต่อ" : "ดูตัวอย่าง"}
           </Link>
         )}
         {!loading && isAdmin && (
           <>
             <Link
-              href={`/knowledge/${article.id}/edit`}
+              href={`${base}/${article.id}/edit`}
               className="btn-secondary inline-flex items-center gap-1"
             >
               <Pencil className="h-4 w-4" aria-hidden="true" />
