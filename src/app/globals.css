@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --text-scale: 1;
+  --color-bg: #faf7f0;
+  --color-surface: #ffffff;
+  --color-text-primary: #0a2240;
+  --color-text-muted: #3d4f63;
+  --color-border: #c5cdd8;
+  --color-accent: #1b6b6b;
+  --color-accent-hover: #145252;
+  --color-focus: #b8860b;
+}
+
+[data-theme="dark"] {
+  --color-bg: #0a1628;
+  --color-surface: #0f1e33;
+  --color-text-primary: #f5f3ee;
+  --color-text-muted: #b8c4d4;
+  --color-border: #2a3f5c;
+  --color-accent: #4db8b8;
+  --color-accent-hover: #6dcfcf;
+  --color-focus: #d4a84b;
+}
+
+html {
+  font-size: calc(100% * var(--text-scale, 1));
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  font-family: var(--font-sarabun), Sarabun, system-ui, sans-serif;
+  line-height: 1.7;
+}
+
+@layer components {
+  .focus-ring {
+    @apply outline-none ring-2 ring-offset-2 ring-[var(--color-focus)] ring-offset-[var(--color-bg)];
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-touch min-w-touch items-center justify-center gap-2 rounded-lg bg-navy px-6 py-3 text-lg font-semibold text-cream transition-colors;
+    @apply hover:bg-navy-light focus-visible:focus-ring active:scale-[0.98];
+  }
+
+  [data-theme="dark"] .btn-primary {
+    @apply bg-accent-teal text-white;
+  }
+
+  [data-theme="dark"] .btn-primary:hover {
+    background-color: var(--color-accent-hover);
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-touch min-w-touch items-center justify-center gap-2 rounded-lg border-2 border-navy bg-transparent px-6 py-3 text-lg font-semibold text-[var(--color-text-primary)] transition-colors;
+    @apply hover:bg-navy hover:text-cream focus-visible:focus-ring;
+  }
+
+  .card {
+    @apply rounded-xl border-2 border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm;
+  }
+
+  .section-title {
+    @apply text-heading font-bold text-[var(--color-text-primary)];
+  }
+
+  .prose-accessible {
+    @apply text-body-lg text-[var(--color-text-primary)] leading-relaxed;
+  }
+}
